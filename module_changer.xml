@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_changer" default="compile.module.changer">
+  <dirname property="module.changer.basedir" file="${ant.file.module_changer}"/>
+  
+  <property name="module.jdk.home.changer" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.changer" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.changer" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.changer" value="-encoding UTF-8 -source 10 -target 10 ${compiler.args}"/>
+  
+  <property name="changer.output.dir" value="${module.changer.basedir}/out/production/Changer"/>
+  <property name="changer.testoutput.dir" value="${module.changer.basedir}/out/test/Changer"/>
+  
+  <path id="changer.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="changer.module.production.classpath">
+    <path refid="${module.jdk.classpath.changer}"/>
+  </path>
+  
+  <path id="changer.runtime.production.module.classpath">
+    <pathelement location="${changer.output.dir}"/>
+  </path>
+  
+  <path id="changer.module.classpath">
+    <path refid="${module.jdk.classpath.changer}"/>
+    <pathelement location="${changer.output.dir}"/>
+  </path>
+  
+  <path id="changer.runtime.module.classpath">
+    <pathelement location="${changer.testoutput.dir}"/>
+    <pathelement location="${changer.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.changer">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.changer">
+    <patternset refid="excluded.from.module.changer"/>
+  </patternset>
+  
+  <path id="changer.module.sourcepath">
+    <dirset dir="${module.changer.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.changer" depends="compile.module.changer.production,compile.module.changer.tests" description="Compile module Changer"/>
+  
+  <target name="compile.module.changer.production" depends="register.custom.compilers" description="Compile module Changer; production classes">
+    <mkdir dir="${changer.output.dir}"/>
+    <javac2 destdir="${changer.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.changer}/javac">
+      <compilerarg line="${compiler.args.changer}"/>
+      <bootclasspath refid="changer.module.bootclasspath"/>
+      <classpath refid="changer.module.production.classpath"/>
+      <src refid="changer.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.changer"/>
+    </javac2>
+    
+    <copy todir="${changer.output.dir}">
+      <fileset dir="${module.changer.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.changer.tests" depends="register.custom.compilers,compile.module.changer.production" description="compile module Changer; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.changer" description="cleanup module">
+    <delete dir="${changer.output.dir}"/>
+    <delete dir="${changer.testoutput.dir}"/>
+  </target>
+</project>
